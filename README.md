@@ -36,40 +36,29 @@
 
 ## 빌드 및 설치
 
-### 방법 A: Xcode
+Xcode가 필요합니다.
 
-1. `AlwaysBlackWallpaper.xcodeproj`를 엽니다.
-2. `AlwaysBlackWallpaper` 스킴과 "My Mac"을 선택하고 ⌘R로 실행합니다.
-3. 릴리스 빌드: **Product > Archive** → **Distribute App > Custom > Copy App**으로 내보낸 뒤
-   `Always Black Wallpaper.app`을 `/Applications`로 옮깁니다.
-   터미널에서 빌드하려면:
-   ```bash
-   xcodebuild -project AlwaysBlackWallpaper.xcodeproj -scheme AlwaysBlackWallpaper -configuration Release -derivedDataPath ~/Library/Developer/Xcode/DerivedData/AlwaysBlackWallpaper build
-   ```
-   ```bash
-   cp -R ~/Library/Developer/Xcode/DerivedData/AlwaysBlackWallpaper/Build/Products/Release/"Always Black Wallpaper.app" /Applications/
-   ```
-
-프로젝트가 iCloud Drive로 동기화되는 폴더(예: `~/Documents`, `~/Desktop`) 안에 있으면 `-derivedDataPath`를 그 안으로 지정하지 마세요.
-iCloud가 `.app`에 확장 속성을 붙여서 codesign이 `resource fork, Finder information, or similar detritus not allowed` 에러로 실패합니다.
-Xcode 기본 DerivedData 위치(`~/Library/Developer/Xcode/DerivedData`)는 문제없습니다.
-
-Apple ID 팀으로 서명하려면 **Signing & Capabilities**에서 Team을 지정하고 "Automatically manage signing"을 켭니다.
-App Sandbox capability는 추가하지 마세요.
-
-### 방법 B: Xcode 없이 (Command Line Tools만)
-
-`build.sh`가 `swiftc`로 컴파일하고 `.app` 번들을 직접 만듭니다.
+가장 간단한 방법 (빌드 → `/Applications` 설치 → 실행):
 
 ```bash
 ./build.sh --install
 ```
 
-`build/Always Black Wallpaper.app`을 빌드하고, `/Applications`에 복사한 뒤 실행합니다.
-`--install` 없이 실행하면 빌드만 합니다.
+`--install` 없이 실행하면 빌드만 합니다. 내부적으로 `xcodebuild`로 Release 빌드를 합니다.
 
-일부 Command Line Tools 버전은 `ServiceManagement`를 import할 때 `redefinition of module 'SwiftBridging'` 에러가 납니다.
-`build.sh`는 이 경우를 감지해서 VFS overlay로 우회합니다. 시스템 파일은 수정하지 않습니다.
+Xcode 앱에서 직접 하려면:
+
+1. `AlwaysBlackWallpaper.xcodeproj`를 엽니다.
+2. `AlwaysBlackWallpaper` 스킴과 "My Mac"을 선택하고 ⌘R로 실행합니다.
+3. 설치: **Product > Archive** → **Distribute App > Custom > Copy App**으로 내보낸 뒤
+   `Always Black Wallpaper.app`을 `/Applications`로 옮깁니다.
+
+빌드 결과는 프로젝트 폴더가 아니라 `~/Library/Developer/Xcode/DerivedData`에 만들어집니다.
+프로젝트가 iCloud Drive 동기화 폴더(예: `~/Documents`)에 있으면, 그 안에서 만든 `.app`은
+iCloud가 붙이는 확장 속성 때문에 codesign이 `resource fork, Finder information, or similar detritus not allowed` 에러로 실패하기 때문입니다.
+
+Apple ID 팀으로 서명하려면 **Signing & Capabilities**에서 Team을 지정하고 "Automatically manage signing"을 켭니다.
+App Sandbox capability는 추가하지 마세요.
 
 ### 로그인 시 자동 실행
 
@@ -98,7 +87,7 @@ AlwaysBlackWallpaper/
   LoginItemManager.swift         SMAppService.mainApp 래퍼
   Info.plist
 AlwaysBlackWallpaper.xcodeproj
-build.sh                         Xcode 없이 swiftc로 빌드
+build.sh                         xcodebuild로 빌드 + 설치
 ```
 
 ## 설정 초기화
