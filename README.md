@@ -26,7 +26,7 @@
   (`defaultLaunchBehavior(.suppressed)`). 창은 메뉴바 메뉴나 Dock 아이콘 클릭으로 엽니다.
   창을 닫아도 앱은 종료되지 않습니다. 종료는 메뉴바 메뉴에서 합니다.
 
-## 호환성 확인 결과 (macOS 27.0, Apple Silicon)
+## 호환성 확인 결과 (macOS 27.0, Xcode 27.0, Apple Silicon)
 
 - `NSWorkspace.setDesktopImageURL(_:for:options:)`, `desktopImageURL(for:)`: 정상 동작, deprecated 아님.
   실제 확인: 외장 DELL U2723QE는 `black.png`로 바뀌고, 빌트인 디스플레이는 그대로였습니다.
@@ -44,11 +44,15 @@
    `Always Black Wallpaper.app`을 `/Applications`로 옮깁니다.
    터미널에서 빌드하려면:
    ```bash
-   xcodebuild -project AlwaysBlackWallpaper.xcodeproj -scheme AlwaysBlackWallpaper -configuration Release -derivedDataPath build/xcode
+   xcodebuild -project AlwaysBlackWallpaper.xcodeproj -scheme AlwaysBlackWallpaper -configuration Release -derivedDataPath ~/Library/Developer/Xcode/DerivedData/AlwaysBlackWallpaper build
    ```
    ```bash
-   cp -R "build/xcode/Build/Products/Release/Always Black Wallpaper.app" /Applications/
+   cp -R ~/Library/Developer/Xcode/DerivedData/AlwaysBlackWallpaper/Build/Products/Release/"Always Black Wallpaper.app" /Applications/
    ```
+
+프로젝트가 iCloud Drive로 동기화되는 폴더(예: `~/Documents`, `~/Desktop`) 안에 있으면 `-derivedDataPath`를 그 안으로 지정하지 마세요.
+iCloud가 `.app`에 확장 속성을 붙여서 codesign이 `resource fork, Finder information, or similar detritus not allowed` 에러로 실패합니다.
+Xcode 기본 DerivedData 위치(`~/Library/Developer/Xcode/DerivedData`)는 문제없습니다.
 
 Apple ID 팀으로 서명하려면 **Signing & Capabilities**에서 Team을 지정하고 "Automatically manage signing"을 켭니다.
 App Sandbox capability는 추가하지 마세요.
