@@ -104,12 +104,18 @@ final class WallpaperManager: ObservableObject {
         }
     }
 
-    /// Coalesces bursts of notifications into one apply.
+    /// Applies right away on the first notification of a burst, so the old wallpaper is visible
+    /// as briefly as possible, then once more after the burst settles.
     func scheduleApply() {
+        if pendingApply == nil {
+            refreshDisplays()
+            if isEnabled { applyNow() }
+        }
         pendingApply?.cancel()
         let work = DispatchWorkItem { [weak self] in
             MainActor.assumeIsolated {
                 guard let self else { return }
+                self.pendingApply = nil
                 self.refreshDisplays()
                 if self.isEnabled { self.applyNow() }
             }
@@ -150,6 +156,7 @@ final class WallpaperManager: ObservableObject {
 
     private func restoreOriginals() {
         pendingApply?.cancel()
+        pendingApply = nil
         let workspace = NSWorkspace.shared
         let stored = originals
         var errors: [String] = []

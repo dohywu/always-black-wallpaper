@@ -13,7 +13,7 @@
 | Space 전환 (`setDesktopImageURL`은 각 디스플레이의 현재 Space에만 적용됨) | `NSWorkspace.activeSpaceDidChangeNotification` |
 | 잠자기에서 깨어남 | `NSWorkspace.didWakeNotification`, `NSWorkspace.screensDidWakeNotification` |
 
-- 모든 알림은 0.5초 debounce를 거칩니다. 알림이 연속으로 와도 한 번만 적용합니다.
+- 첫 알림에서 바로 적용하고, 연속으로 오는 알림은 0.5초 debounce로 묶어 한 번 더 적용합니다.
 - 이미 `black.png`인 디스플레이는 건너뜁니다. 배경화면을 불필요하게 다시 쓰지 않습니다.
 - `black.png`(64×64 검은색)는 첫 실행 시 코드로 생성합니다.
   위치: `~/Library/Application Support/AlwaysBlackWallpaper/black.png`.
@@ -71,7 +71,7 @@ App Sandbox capability는 추가하지 마세요.
 ## 알려진 제약
 
 - `setDesktopImageURL`은 각 디스플레이의 **현재 Space**만 바꿉니다. 다른 Space는 전환하는 순간 검은색으로 바뀝니다.
-  전환 직후 약 0.5초 동안 이전 배경화면이 보일 수 있습니다.
+  macOS가 처음 보는 모니터나 새 Space에 기본 배경화면을 먼저 그린 뒤 알림을 보내므로, 연결·전환 직후 잠깐 이전 배경화면이 보일 수 있습니다.
 - 복원은 디스플레이당 배경화면 하나만 기억합니다. Space별로 기억하지 않습니다.
 - 원래 배경화면이 다이내믹/Aerial 배경화면이면, macOS가 보고한 파일 URL(예: `/System/Library/CoreServices/DefaultDesktop.heic`)로 복원합니다.
   원래 모습과 다를 수 있습니다.
