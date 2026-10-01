@@ -27,6 +27,18 @@ final class WallpaperManager: ObservableObject {
             } else {
                 restoreOriginals()
             }
+            updateOverlay()
+        }
+    }
+    /// 즉시 적용: apply on the first notification instead of waiting for the debounce.
+    @Published var applyImmediately: Bool {
+        didSet { defaults.set(applyImmediately, forKey: Keys.applyImmediately) }
+    }
+    /// 깜빡임 방지 덮개: cover external displays with a black window that stays on every Space.
+    @Published var overlayEnabled: Bool {
+        didSet {
+            defaults.set(overlayEnabled, forKey: Keys.overlayEnabled)
+            updateOverlay()
         }
     }
     @Published private(set) var displays: [DisplayInfo] = []
@@ -38,11 +50,14 @@ final class WallpaperManager: ObservableObject {
     private let defaults = UserDefaults.standard
     private var observers: [NSObjectProtocol] = []
     private var pendingApply: DispatchWorkItem?
+    private let overlay = BlackOverlayController()
     private static let debounceInterval: TimeInterval = 0.5
 
     private enum Keys {
         static let enabled = "enabled"
         static let originals = "originalWallpapers"
+        static let applyImmediately = "applyImmediately"
+        static let overlayEnabled = "overlayEnabled"
     }
 
     /// Wallpaper URL each external display had before we turned it black, keyed by display UUID.
@@ -60,8 +75,10 @@ final class WallpaperManager: ObservableObject {
     }
 
     private init() {
-        defaults.register(defaults: [Keys.enabled: true])
+        defaults.register(defaults: [Keys.enabled: true, Keys.applyImmediately: true, Keys.overlayEnabled: false])
         isEnabled = defaults.bool(forKey: Keys.enabled)
+        applyImmediately = defaults.bool(forKey: Keys.applyImmediately)
+        overlayEnabled = defaults.bool(forKey: Keys.overlayEnabled)
 
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("AlwaysBlackWallpaper", isDirectory: true)
@@ -75,6 +92,7 @@ final class WallpaperManager: ObservableObject {
 
         startObserving()
         refreshDisplays()
+        updateOverlay()
         if isEnabled { applyNow() }
     }
 
@@ -88,7 +106,11 @@ final class WallpaperManager: ObservableObject {
         observers.append(center.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.scheduleApply() }
+            MainActor.assumeIsolated {
+                // The overlay is cheap and local, so place it right away without debouncing.
+                self?.updateOverlay()
+                self?.scheduleApply()
+            }
         })
 
         // setDesktopImageURL only affects the current Space of each display, so re-apply on Space switch.
@@ -104,10 +126,10 @@ final class WallpaperManager: ObservableObject {
         }
     }
 
-    /// Applies right away on the first notification of a burst, so the old wallpaper is visible
-    /// as briefly as possible, then once more after the burst settles.
+    /// With applyImmediately, applies on the first notification of a burst so the old wallpaper
+    /// is visible as briefly as possible. Always applies once more after the burst settles.
     func scheduleApply() {
-        if pendingApply == nil {
+        if applyImmediately && pendingApply == nil {
             refreshDisplays()
             if isEnabled { applyNow() }
         }
@@ -178,6 +200,10 @@ final class WallpaperManager: ObservableObject {
 
         lastError = errors.isEmpty ? nil : errors.joined(separator: "\n")
         refreshDisplays()
+    }
+
+    private func updateOverlay() {
+        overlay.update(enabled: isEnabled && overlayEnabled)
     }
 
     func refreshDisplays() {

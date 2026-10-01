@@ -4,6 +4,8 @@
 
 기존 Hammerspoon 설정(`hs.screen.watcher` + `desktopImageURL`)을 독립 앱으로 옮긴 것입니다.
 
+현재 버전과 변경 내용은 [CHANGELOG.md](CHANGELOG.md)와 [Releases](https://github.com/dohywu/always-black-wallpaper/releases)에서 확인할 수 있습니다.
+
 ## 동작 방식
 
 | 시점 | API |
@@ -13,7 +15,10 @@
 | Space 전환 (`setDesktopImageURL`은 각 디스플레이의 현재 Space에만 적용됨) | `NSWorkspace.activeSpaceDidChangeNotification` |
 | 잠자기에서 깨어남 | `NSWorkspace.didWakeNotification`, `NSWorkspace.screensDidWakeNotification` |
 
-- 첫 알림에서 바로 적용하고, 연속으로 오는 알림은 0.5초 debounce로 묶어 한 번 더 적용합니다.
+- **즉시 적용**(기본 켜짐): 첫 알림에서 바로 적용하고, 연속으로 오는 알림은 0.5초 debounce로 묶어 한 번 더 적용합니다.
+  끄면 0.5초 debounce 뒤에 한 번만 적용합니다.
+- **깜빡임 방지 덮개**(기본 꺼짐): 외장 디스플레이마다 배경화면 바로 위 레벨(`kCGDesktopWindowLevel - 2`)에
+  검은 창을 깝니다. `canJoinAllSpaces`라 모든 Space에 고정되고, 클릭은 통과합니다. 바탕화면 아이콘과 위젯은 그 위에 보입니다.
 - 이미 `black.png`인 디스플레이는 건너뜁니다. 배경화면을 불필요하게 다시 쓰지 않습니다.
 - `black.png`(64×64 검은색)는 첫 실행 시 코드로 생성합니다.
   위치: `~/Library/Application Support/AlwaysBlackWallpaper/black.png`.
@@ -68,10 +73,18 @@ App Sandbox capability는 추가하지 마세요.
 
 등록 후 앱 위치를 옮겼다면 토글을 껐다가 다시 켜세요.
 
+## 버전 관리
+
+- 버전은 Xcode 프로젝트의 `MARKETING_VERSION`(예: `1.1.0`)과 `CURRENT_PROJECT_VERSION`(빌드 번호)에서만 관리합니다.
+  `Info.plist`는 이 값을 그대로 씁니다.
+- 앱 창 하단과 메뉴바 메뉴 맨 위에 버전이 표시됩니다.
+- 업데이트할 때마다 버전을 올리고 [CHANGELOG.md](CHANGELOG.md)에 기록한 뒤, GitHub에 `vX.Y.Z` 태그와 Release(빌드된 앱 zip 첨부)를 올립니다.
+
 ## 알려진 제약
 
 - `setDesktopImageURL`은 각 디스플레이의 **현재 Space**만 바꿉니다. 다른 Space는 전환하는 순간 검은색으로 바뀝니다.
   macOS가 처음 보는 모니터나 새 Space에 기본 배경화면을 먼저 그린 뒤 알림을 보내므로, 연결·전환 직후 잠깐 이전 배경화면이 보일 수 있습니다.
+  **깜빡임 방지 덮개**를 켜면 이 문제가 줄어듭니다.
 - 복원은 디스플레이당 배경화면 하나만 기억합니다. Space별로 기억하지 않습니다.
 - 원래 배경화면이 다이내믹/Aerial 배경화면이면, macOS가 보고한 파일 URL(예: `/System/Library/CoreServices/DefaultDesktop.heic`)로 복원합니다.
   원래 모습과 다를 수 있습니다.
@@ -85,9 +98,11 @@ AlwaysBlackWallpaper/
   ContentView.swift              설정 창
   WallpaperManager.swift         알림 감지, debounce, 적용/복원, black.png 생성
   LoginItemManager.swift         SMAppService.mainApp 래퍼
+  BlackOverlayController.swift   깜빡임 방지 덮개 창
   Info.plist
 AlwaysBlackWallpaper.xcodeproj
 build.sh                         xcodebuild로 빌드 + 설치
+CHANGELOG.md                     버전별 변경 이력
 ```
 
 ## 설정 초기화

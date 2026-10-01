@@ -26,6 +26,16 @@ struct AlwaysBlackWallpaperApp: App {
     }
 }
 
+enum AppVersion {
+    /// "1.1.0 (2)" from CFBundleShortVersionString and CFBundleVersion.
+    static var display: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
+    }
+}
+
 final class AppDelegate: NSObject, NSApplicationDelegate {
     static let mainWindowID = "main"
     /// Set by the menu bar label so the Dock icon can open the SwiftUI window.
@@ -36,9 +46,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            MainActor.assumeIsolated { Self.openMainWindow?() }
-        }
+        // Ignore `flag`: the black overlay windows count as visible, but the user wants the main window.
+        MainActor.assumeIsolated { Self.openMainWindow?() }
         return true
     }
 }
@@ -63,7 +72,13 @@ private struct MenuBarContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
+        Text("Always Black Wallpaper \(AppVersion.display)")
+        Divider()
         Toggle("외장 디스플레이 검은 배경 유지", isOn: $wallpaper.isEnabled)
+        Toggle("즉시 적용", isOn: $wallpaper.applyImmediately)
+            .disabled(!wallpaper.isEnabled)
+        Toggle("깜빡임 방지 덮개", isOn: $wallpaper.overlayEnabled)
+            .disabled(!wallpaper.isEnabled)
         Button("지금 다시 적용") { wallpaper.applyNow() }
             .disabled(!wallpaper.isEnabled)
         Divider()

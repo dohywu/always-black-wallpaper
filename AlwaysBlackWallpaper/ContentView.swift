@@ -12,6 +12,18 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
+                Toggle("즉시 적용", isOn: $wallpaper.applyImmediately)
+                    .disabled(!wallpaper.isEnabled)
+                Text("모니터 연결·Space 전환 알림이 오면 0.5초 기다리지 않고 바로 검은색으로 바꿉니다.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Toggle("깜빡임 방지 덮개", isOn: $wallpaper.overlayEnabled)
+                    .disabled(!wallpaper.isEnabled)
+                Text("외장 디스플레이의 배경화면 바로 위에 검은 창을 깔아 둡니다. 모든 Space에 고정되어 Space 전환 때 이전 배경화면이 보이지 않습니다. 바탕화면 아이콘과 위젯은 그대로 보입니다.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
                 Toggle("로그인 시 자동 실행", isOn: Binding(
                     get: { loginItem.isEnabled || loginItem.requiresApproval },
                     set: { loginItem.setEnabled($0) }
@@ -62,6 +74,11 @@ struct ContentView: View {
                 if let error = wallpaper.lastError {
                     Text(error).font(.caption).foregroundStyle(.red)
                 }
+            } footer: {
+                Text("버전 \(AppVersion.display)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .formStyle(.grouped)
