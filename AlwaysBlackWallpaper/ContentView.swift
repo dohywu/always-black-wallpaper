@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct ContentView: View {
@@ -85,8 +86,14 @@ struct ContentView: View {
         .frame(width: 440)
         .fixedSize(horizontal: false, vertical: true)
         .onAppear {
+            // Show the Dock icon only while this window is open; the app otherwise lives in the menu bar.
+            NSApp.setActivationPolicy(.regular)
+            NSApp.activate()
             wallpaper.refreshDisplays()
             loginItem.refresh()
+        }
+        .onDisappear {
+            NSApp.setActivationPolicy(.accessory)
         }
     }
 }

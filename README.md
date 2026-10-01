@@ -27,9 +27,11 @@
   `UserDefaults`(`originalWallpapers`)에 디스플레이 UUID별로 저장합니다. 토글을 끄면 이 URL로 복원합니다.
   다시 켜면 그 시점의 배경화면을 새로 저장합니다.
 - **로그인 시 자동 실행:** `SMAppService.mainApp` 사용.
-- 앱 창(설정, 디스플레이 목록)과 메뉴바 아이콘이 모두 있습니다. 로그인 시 실행될 때는 창을 띄우지 않습니다
-  (`defaultLaunchBehavior(.suppressed)`). 창은 메뉴바 메뉴나 Dock 아이콘 클릭으로 엽니다.
-  창을 닫아도 앱은 종료되지 않습니다. 종료는 메뉴바 메뉴에서 합니다.
+- 평소에는 **메뉴바에만** 있고 Dock에는 나오지 않습니다(`LSUIElement`). 실행해도 창을 띄우지 않습니다
+  (`defaultLaunchBehavior(.suppressed)`).
+- 메뉴바에서 **창 열기…**를 누르면 앱 창(설정, 디스플레이 목록)이 열리고 Dock 아이콘이 나타납니다.
+  창을 닫으면 Dock 아이콘이 사라지고 앱은 메뉴바에서 계속 실행됩니다. 종료는 메뉴바 메뉴에서 합니다.
+- 이미 실행 중일 때 Finder나 Spotlight에서 앱을 다시 실행해도 창이 열립니다.
 
 ## 호환성 확인 결과 (macOS 27.0, Xcode 27.0, Apple Silicon)
 

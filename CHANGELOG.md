@@ -8,6 +8,12 @@
 
 각 버전은 GitHub에 `vX.Y.Z` 태그와 Release로 올라갑니다.
 
+## [1.2.0] - 2026-10-01
+
+### 변경
+- 평소에는 Dock에 아이콘을 표시하지 않고 메뉴바에만 있습니다 (`LSUIElement`).
+- 메뉴바에서 **창 열기…**를 누르면 창과 함께 Dock 아이콘이 나타나고, 창을 닫으면 Dock 아이콘이 사라집니다. 앱은 계속 실행됩니다.
+
 ## [1.1.0] - 2026-10-01
 
 ### 추가
@@ -31,5 +37,6 @@
 - 앱 창과 메뉴바 아이콘.
 - 앱 아이콘 (`ABW-icon.icon`).
 
+[1.2.0]: https://github.com/dohywu/always-black-wallpaper/releases/tag/v1.2.0
 [1.1.0]: https://github.com/dohywu/always-black-wallpaper/releases/tag/v1.1.0
 [1.0.0]: https://github.com/dohywu/always-black-wallpaper/releases/tag/v1.0.0
